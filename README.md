@@ -1,3 +1,4 @@
+This is demo app for my medium article - https://medium.com/data-science-collective/building-an-e-commerce-support-ai-agent-with-agentforce-rag-routing-and-zero-vector-store-5d49e6149e09
 # Stride Shoes 👟
 
 A modern e-commerce shoe store website with an AI-powered customer support agent built on **Salesforce Agentforce**.
