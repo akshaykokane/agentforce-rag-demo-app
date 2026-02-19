@@ -1,0 +1,351 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stride Shoes — Walk Your Way</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <i class="fa-solid fa-shoe-prints"></i> STRIDE
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="#products">Shop</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="cart-btn" id="cartBtn">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="hamburger" id="hamburger">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <p class="hero-tag">NEW COLLECTION 2026</p>
+      <h1>Step Into <span class="gradient-text">Greatness</span></h1>
+      <p class="hero-desc">
+        Experience unmatched comfort and style with Stride's latest collection.
+        Engineered for those who never stop moving.
+      </p>
+      <div class="hero-buttons">
+        <a href="#products" class="btn btn-primary">Shop Now <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="#features" class="btn btn-outline">Learn More</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>50K+</strong><span>Happy Customers</span></div>
+        <div class="stat"><strong>200+</strong><span>Shoe Models</span></div>
+        <div class="stat"><strong>4.9</strong><span>Average Rating</span></div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-shoe-card">
+        <div class="shoe-visual">
+          <div class="floating-shoe">👟</div>
+          <div class="glow"></div>
+        </div>
+        <p class="shoe-label">Stride AirMax Pro</p>
+        <p class="shoe-price">$189.99</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PRODUCTS ========== -->
+  <section class="products" id="products">
+    <div class="section-header">
+      <p class="section-tag">OUR COLLECTION</p>
+      <h2>Trending Now</h2>
+      <p class="section-desc">Hand-picked styles loved by athletes and trend-setters alike.</p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="running">Running</button>
+      <button class="filter-btn" data-filter="casual">Casual</button>
+      <button class="filter-btn" data-filter="sport">Sport</button>
+      <button class="filter-btn" data-filter="lifestyle">Lifestyle</button>
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- Products injected by JS -->
+    </div>
+  </section>
+
+  <!-- ========== FEATURES ========== -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <p class="section-tag">WHY STRIDE</p>
+      <h2>Built Different</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-feather-pointed"></i></div>
+        <h3>Ultra Lightweight</h3>
+        <p>Advanced foam technology keeps every pair under 250g for cloud-like comfort.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Durable Build</h3>
+        <p>Reinforced soles and premium materials built to outlast any adventure.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-leaf"></i></div>
+        <h3>Eco-Friendly</h3>
+        <p>Made with 60% recycled materials. Good for you, great for the planet.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
+        <h3>Free Shipping</h3>
+        <p>Complimentary express shipping on every order, worldwide.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <h3>30-Day Returns</h3>
+        <p>Not the right fit? Return hassle-free within 30 days.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-star"></i></div>
+        <h3>5-Star Support</h3>
+        <p>Our support team is available 24/7 to assist you with anything.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== REVIEWS ========== -->
+  <section class="reviews" id="reviews">
+    <div class="section-header">
+      <p class="section-tag">TESTIMONIALS</p>
+      <h2>What People Say</h2>
+    </div>
+    <div class="review-carousel">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"Best running shoes I've ever owned. The comfort is unreal and they look amazing."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">JM</div>
+          <div><strong>Jake Morrison</strong><span>Marathon Runner</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"Stride shoes transformed my daily walks. Super lightweight and incredibly stylish."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">SP</div>
+          <div><strong>Sarah Parker</strong><span>Fitness Enthusiast</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"I've tried dozens of brands. Stride is the only one that checks every box for me."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">DL</div>
+          <div><strong>David Liu</strong><span>Sneaker Collector</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== NEWSLETTER ========== -->
+  <section class="newsletter">
+    <div class="newsletter-content">
+      <h2>Get 15% Off Your First Order</h2>
+      <p>Subscribe to our newsletter for exclusive deals, new drops, and more.</p>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" placeholder="Enter your email" required />
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========== CONTACT ========== -->
+  <section class="contact" id="contact">
+    <div class="section-header">
+      <p class="section-tag">GET IN TOUCH</p>
+      <h2>Contact Us</h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <div><strong>Address</strong><p>123 Stride Avenue, New York, NY 10001</p></div>
+        </div>
+        <div class="contact-item">
+          <i class="fa-solid fa-phone"></i>
+          <div><strong>Phone</strong><p>+1 (555) 123-4567</p></div>
+        </div>
+        <div class="contact-item">
+          <i class="fa-solid fa-envelope"></i>
+          <div><strong>Email</strong><p>hello@strideshoes.com</p></div>
+        </div>
+        <div class="contact-item">
+          <i class="fa-solid fa-clock"></i>
+          <div><strong>Hours</strong><p>Mon – Fri: 9AM – 6PM EST</p></div>
+        </div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <input type="text" placeholder="Your Name" required />
+        <input type="email" placeholder="Your Email" required />
+        <textarea placeholder="Your Message" rows="5" required></textarea>
+        <button type="submit" class="btn btn-primary">Send Message <i class="fa-solid fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo"><i class="fa-solid fa-shoe-prints"></i> STRIDE</a>
+        <p>Engineered for comfort. Designed for life.</p>
+        <div class="social-links">
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-facebook"></i></a>
+          <a href="#"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="#">Running</a>
+        <a href="#">Casual</a>
+        <a href="#">Sport</a>
+        <a href="#">Lifestyle</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Press</a>
+        <a href="#">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="#">FAQ</a>
+        <a href="#">Shipping</a>
+        <a href="#">Returns</a>
+        <a href="#">Size Guide</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Stride Shoes. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ========== CART SIDEBAR ========== -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3><i class="fa-solid fa-bag-shopping"></i> Your Cart</h3>
+      <button class="cart-close" id="cartClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <p>Your cart is empty</p>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">$0.00</strong>
+      </div>
+      <button class="btn btn-primary btn-full">Checkout <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ========== TOAST ========== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== ECOMPRO AI CHAT AGENT ========== -->
+  <div class="ecompro-fab" id="ecomproFab" title="Chat with EcomPro AI">
+    <i class="fa-solid fa-headset"></i>
+  </div>
+
+  <div class="ecompro-chat" id="ecomproChat">
+    <div class="ecompro-header">
+      <div class="ecompro-header-info">
+        <div class="ecompro-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div>
+          <strong>EcomPro</strong>
+          <span class="ecompro-status">AI Support Agent &bull; Online</span>
+        </div>
+      </div>
+      <div class="ecompro-header-actions">
+        <button class="ecompro-settings-btn" id="ecomproSettingsBtn" title="Agentforce Settings"><i class="fa-solid fa-gear"></i></button>
+        <button class="ecompro-close" id="ecomproClose"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="ecompro-settings" id="ecomproSettings">
+      <div class="ecompro-settings-inner">
+        <h4><i class="fa-solid fa-cloud"></i> Salesforce Agentforce</h4>
+        <p class="ecompro-settings-desc">Connect your Salesforce Agentforce agent to power EcomPro with real AI.</p>
+        <div class="ecompro-status-badge" id="ecomproConnectionStatus">
+          <span class="status-dot offline"></span> Not Connected
+        </div>
+        <div class="ecompro-field">
+          <label>My Domain URL</label>
+          <input type="text" id="sfDomainUrl" placeholder="your-org.my.salesforce.com" />
+        </div>
+        <div class="ecompro-field">
+          <label>Consumer Key</label>
+          <input type="text" id="sfConsumerKey" placeholder="Paste your consumer key" />
+        </div>
+        <div class="ecompro-field">
+          <label>Consumer Secret</label>
+          <input type="password" id="sfConsumerSecret" placeholder="Paste your consumer secret" />
+        </div>
+        <div class="ecompro-field">
+          <label>Agent ID</label>
+          <input type="text" id="sfAgentId" placeholder="e.g. 0XxQZ0000000Ty50AE" />
+        </div>
+        <button class="btn btn-primary btn-full ecompro-connect-btn" id="sfConnectBtn">
+          <i class="fa-solid fa-plug"></i> Connect &amp; Start Session
+        </button>
+        <button class="btn btn-outline btn-full ecompro-back-btn" id="sfBackBtn">
+          <i class="fa-solid fa-arrow-left"></i> Back to Chat
+        </button>
+      </div>
+    </div>
+
+    <div class="ecompro-messages" id="ecomproMessages">
+      <div class="ecompro-msg bot">
+        <div class="ecompro-msg-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="ecompro-msg-bubble">
+          Hi there! 👋 I'm <strong>EcomPro</strong>, your AI shopping assistant for Stride Shoes. How can I help you today?
+          <div class="ecompro-suggestions">
+            <button class="ecompro-suggestion" data-q="What are your best running shoes?">Best running shoes?</button>
+            <button class="ecompro-suggestion" data-q="What is your return policy?">Return policy</button>
+            <button class="ecompro-suggestion" data-q="Do you offer free shipping?">Free shipping?</button>
+            <button class="ecompro-suggestion" data-q="How do I track my order?">Track my order</button>
+          </div>
+          <p class="ecompro-mode-note" id="ecomproModeNote">⚡ Using local AI &mdash; <a href="#" id="openSettingsLink">connect Agentforce</a> for full power</p>
+        </div>
+      </div>
+    </div>
+    <form class="ecompro-input" id="ecomproForm">
+      <input type="text" id="ecomproInput" placeholder="Ask EcomPro anything..." autocomplete="off" />
+      <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
