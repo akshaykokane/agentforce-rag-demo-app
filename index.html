@@ -283,7 +283,7 @@
         <div class="ecompro-avatar"><i class="fa-solid fa-robot"></i></div>
         <div>
           <strong>EcomPro</strong>
-          <span class="ecompro-status">AI Support Agent &bull; Online</span>
+          <span class="ecompro-status" id="ecomproHeaderStatus">AI Support Agent &bull; Online</span>
         </div>
       </div>
       <div class="ecompro-header-actions">
@@ -326,24 +326,26 @@
     </div>
 
     <div class="ecompro-messages" id="ecomproMessages">
-      <div class="ecompro-msg bot">
-        <div class="ecompro-msg-avatar"><i class="fa-solid fa-robot"></i></div>
-        <div class="ecompro-msg-bubble">
-          Hi there! 👋 I'm <strong>EcomPro</strong>, your AI shopping assistant for Stride Shoes. How can I help you today?
-          <div class="ecompro-suggestions">
-            <button class="ecompro-suggestion" data-q="What are your best running shoes?">Best running shoes?</button>
-            <button class="ecompro-suggestion" data-q="What is your return policy?">Return policy</button>
-            <button class="ecompro-suggestion" data-q="Do you offer free shipping?">Free shipping?</button>
-            <button class="ecompro-suggestion" data-q="How do I track my order?">Track my order</button>
-          </div>
-          <p class="ecompro-mode-note" id="ecomproModeNote">⚡ Using local AI &mdash; <a href="#" id="openSettingsLink">connect Agentforce</a> for full power</p>
-        </div>
-      </div>
+      <!-- Messages will be dynamically added -->
     </div>
     <form class="ecompro-input" id="ecomproForm">
       <input type="text" id="ecomproInput" placeholder="Ask EcomPro anything..." autocomplete="off" />
       <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
     </form>
+  </div>
+
+  <!-- ========== CASE DETAIL MODAL ========== -->
+  <div class="case-modal-overlay" id="caseModalOverlay"></div>
+  <div class="case-modal" id="caseModal">
+    <div class="case-modal-header">
+      <h3 id="caseModalTitle">Case Details</h3>
+      <button class="case-modal-close" id="caseModalClose">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="case-modal-body" id="caseModalBody">
+      <!-- Content injected by JS -->
+    </div>
   </div>
 
   <script src="app.js"></script>

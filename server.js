@@ -76,6 +76,15 @@ async function getAccessToken() {
   }
 
   const data = await resp.json();
+  
+  // ── DEBUG: Log OAuth token response ──
+  console.log("\n" + "=".repeat(60));
+  console.log("🔐 OAUTH TOKEN ACQUIRED");
+  console.log("=".repeat(60));
+  console.log("Token (masked):", data.access_token ? data.access_token.slice(0, 20) + "..." : "N/A");
+  console.log("Expires in:", data.expires_in || "110 minutes (default)");
+  console.log("=".repeat(60) + "\n");
+  
   cachedToken = data.access_token;
   // Tokens typically last ~2 hours; refresh after 1h50m
   tokenExpiresAt = now + 110 * 60 * 1000;
@@ -116,6 +125,13 @@ app.post("/api/agent/session", async (req, res) => {
     }
 
     const data = await sfResp.json();
+
+    // ── DEBUG: Log raw Agentforce session response ──
+    console.log("\n" + "=".repeat(60));
+    console.log("🔍 AGENTFORCE SESSION CREATION RESPONSE");
+    console.log("=".repeat(60));
+    console.log(JSON.stringify(data, null, 2));
+    console.log("=".repeat(60) + "\n");
 
     // Store session mapping
     sessions.set(data.sessionId, {
@@ -174,6 +190,16 @@ app.post("/api/agent/message", async (req, res) => {
     }
 
     const data = await sfResp.json();
+
+    // ── DEBUG: Log raw Agentforce message response ──
+    console.log("\n" + "=".repeat(60));
+    console.log("🔍 AGENTFORCE MESSAGE RESPONSE");
+    console.log("=".repeat(60));
+    console.log("User Message:", message);
+    console.log("-".repeat(60));
+    console.log(JSON.stringify(data, null, 2));
+    console.log("=".repeat(60) + "\n");
+
     res.json(data);
   } catch (err) {
     console.error("Message error:", err.message);
@@ -204,6 +230,14 @@ app.delete("/api/agent/session/:sessionId", async (req, res) => {
       const errorText = await sfResp.text();
       throw new Error(`Session end failed (${sfResp.status}): ${errorText}`);
     }
+
+    // ── DEBUG: Log session end ──
+    console.log("\n" + "=".repeat(60));
+    console.log("🔍 AGENTFORCE SESSION ENDED");
+    console.log("=".repeat(60));
+    console.log("Session ID:", sessionId);
+    console.log("Status:", sfResp.status);
+    console.log("=".repeat(60) + "\n");
 
     res.json({ success: true, message: "Session ended." });
   } catch (err) {

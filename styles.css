@@ -1031,6 +1031,307 @@ button { cursor: pointer; border: none; font-family: inherit; }
 }
 
 /* ===========================
+   ECOMPRO – CASE CARDS
+   =========================== */
+.cases-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.cases-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dark-4);
+}
+
+.case-card {
+  background: var(--dark-2);
+  border: 1px solid var(--dark-4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.case-card:hover {
+  border-color: var(--primary);
+  background: var(--dark-3);
+  transform: translateX(4px);
+}
+
+.case-card-content {
+  flex: 1;
+}
+
+.case-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin-bottom: 8px;
+}
+
+.case-number i {
+  color: var(--primary-light);
+  font-size: 0.8rem;
+}
+
+.case-subject {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0;
+}
+
+.case-card-arrow {
+  color: var(--gray);
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.case-card:hover .case-card-arrow {
+  color: var(--primary-light);
+  transform: translateX(4px);
+}
+
+/* ===========================
+   CASE DETAIL MODAL
+   =========================== */
+.case-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.case-modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.case-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: var(--dark-2);
+  border: 1px solid var(--dark-4);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.case-modal.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.case-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dark-4);
+}
+
+.case-modal-header h3 {
+  font-size: 1.2rem;
+  color: var(--white);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.case-modal-close {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  font-size: 1rem;
+}
+
+.case-modal-close:hover {
+  background: rgba(255,255,255,0.2);
+  transform: rotate(90deg);
+}
+
+.case-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.case-detail-item {
+  margin-bottom: 20px;
+}
+
+.case-detail-item:last-child {
+  margin-bottom: 0;
+}
+
+.case-detail-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.case-detail-item label i {
+  color: var(--primary-light);
+  font-size: 0.8rem;
+}
+
+.case-detail-value {
+  font-size: 0.95rem;
+  color: var(--white);
+  line-height: 1.6;
+}
+
+.case-description-text {
+  color: var(--gray-light);
+}
+
+.case-status-badge {
+  display: inline-flex;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--white);
+}
+
+.case-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--dark-4);
+}
+
+.case-modal-actions .btn {
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+}
+
+/* ===========================
+   DELIVERY SLOT CARDS
+   =========================== */
+.slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.slots-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dark-4);
+  margin-bottom: 4px;
+}
+
+.slot-card {
+  background: var(--dark-2);
+  border: 1px solid var(--dark-4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.slot-card:hover {
+  border-color: var(--primary);
+  background: var(--dark-3);
+  transform: translateX(4px);
+}
+
+.slot-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(52, 152, 219, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.slot-icon i {
+  color: var(--primary-light);
+  font-size: 1.1rem;
+}
+
+.slot-time {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.slot-arrow {
+  color: var(--gray);
+  font-size: 0.9rem;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.slot-card:hover .slot-arrow {
+  color: var(--primary-light);
+  transform: translateX(4px);
+}
+
+/* ===========================
    SCROLLBAR
    =========================== */
 ::-webkit-scrollbar { width: 6px; }

@@ -189,11 +189,10 @@ const ecomproInput      = $("#ecomproInput");
 const ecomproMsgs       = $("#ecomproMessages");
 const ecomproSettingsBtn = $("#ecomproSettingsBtn");
 const ecomproSettings   = $("#ecomproSettings");
-const ecomproModeNote   = $("#ecomproModeNote");
 const connectionStatus  = $("#ecomproConnectionStatus");
+const ecomproHeaderStatus = $("#ecomproHeaderStatus");
 const sfConnectBtn      = $("#sfConnectBtn");
 const sfBackBtn         = $("#sfBackBtn");
-const openSettingsLink  = $("#openSettingsLink");
 
 // State
 let agentforceSessionId = null;
@@ -204,8 +203,42 @@ ecomproFab.addEventListener("click", () => {
   ecomproChat.classList.add("open");
   ecomproFab.classList.add("hidden");
   ecomproInput.focus();
+  
+  // Initialize chat if first time opening
+  if (ecomproMsgs.children.length === 0) {
+    showWelcomeMessage();
+  }
+  
   checkConfigStatus();
 });
+
+// ── Show Welcome Message ────────────────────────────────
+function showWelcomeMessage() {
+  const welcomeDiv = document.createElement('div');
+  welcomeDiv.className = 'ecompro-msg bot';
+  welcomeDiv.innerHTML = `
+    <div class="ecompro-msg-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="ecompro-msg-bubble">
+      <div class="ecompro-suggestions">
+        <button class="ecompro-suggestion" data-q="What are your best running shoes?">Best running shoes?</button>
+        <button class="ecompro-suggestion" data-q="What is your return policy?">Return policy</button>
+        <button class="ecompro-suggestion" data-q="Do you offer free shipping?">Free shipping?</button>
+        <button class="ecompro-suggestion" data-q="How do I track my order?">Track my order</button>
+      </div>
+      <p class="ecompro-mode-note" id="ecomproModeNote">⚡ Using local AI — <a href="#" id="openSettingsLink">connect Agentforce</a> for full power</p>
+    </div>
+  `;
+  ecomproMsgs.appendChild(welcomeDiv);
+  
+  // Re-attach event listener for settings link
+  const openSettingsLink = document.getElementById('openSettingsLink');
+  if (openSettingsLink) {
+    openSettingsLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      ecomproSettings.classList.add('open');
+    });
+  }
+}
 
 ecomproClose.addEventListener("click", () => {
   ecomproChat.classList.remove("open");
@@ -221,11 +254,6 @@ sfBackBtn.addEventListener("click", () => {
   ecomproSettings.classList.remove("open");
 });
 
-openSettingsLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  ecomproSettings.classList.add("open");
-});
-
 // ── Check Config Status ───────────────────────────
 async function checkConfigStatus() {
   try {
@@ -235,8 +263,8 @@ async function checkConfigStatus() {
       updateConnectionUI("online", `Connected (${data.agentId})`);
       isAgentforceConnected = true;
       ecomproSettingsBtn.classList.add("connected");
-      updateModeNote(true);
       if (!agentforceSessionId) {
+        updateHeaderStatus("connecting", "Agentforce Joining...");
         await createAgentSession();
       }
     }
@@ -272,12 +300,12 @@ sfConnectBtn.addEventListener("click", async () => {
     if (!configData.success) throw new Error("Failed to save config");
 
     // Create Agentforce session
+    updateHeaderStatus("connecting", "Agentforce Joining...");
     await createAgentSession();
 
     isAgentforceConnected = true;
     ecomproSettingsBtn.classList.add("connected");
     updateConnectionUI("online", "Connected to Agentforce ✓");
-    updateModeNote(true);
     showToast("Connected to Salesforce Agentforce! 🚀");
 
     setTimeout(() => ecomproSettings.classList.remove("open"), 800);
@@ -306,11 +334,40 @@ async function createAgentSession() {
   const data = await resp.json();
   agentforceSessionId = data.sessionId;
 
-  if (data.greeting && data.greeting !== "Hi! How can I help you today?") {
+  // Update status to online
+  updateHeaderStatus("online", "Agentforce Online");
+
+  // Clear any welcome message and show Agentforce greeting
+  ecomproMsgs.innerHTML = '';
+  
+  if (data.greeting) {
     appendMessage("bot", data.greeting);
   }
+  
+  // Add suggestion buttons
+  addSuggestions();
 
   return data;
+}
+
+// ── Add Suggestion Buttons ────────────────────────
+function addSuggestions() {
+  const suggestionsDiv = document.createElement('div');
+  suggestionsDiv.className = 'ecompro-msg bot';
+  suggestionsDiv.innerHTML = `
+    <div class="ecompro-msg-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="ecompro-msg-bubble">
+      <div class="ecompro-suggestions">
+        <button class="ecompro-suggestion" data-q="What are your best running shoes?">Best running shoes?</button>
+        <button class="ecompro-suggestion" data-q="What is your return policy?">Return policy</button>
+        <button class="ecompro-suggestion" data-q="Do you offer free shipping?">Free shipping?</button>
+        <button class="ecompro-suggestion" data-q="How do I track my order?">Track my order</button>
+      </div>
+      <p class="ecompro-mode-note connected">✅ Powered by <strong>Salesforce Agentforce</strong></p>
+    </div>
+  `;
+  ecomproMsgs.appendChild(suggestionsDiv);
+  ecomproMsgs.scrollTop = ecomproMsgs.scrollHeight;
 }
 
 // ── Send Message ──────────────────────────────────
@@ -368,11 +425,25 @@ async function sendUserMessage(msg) {
 // ── Extract response from Agentforce API ──────────
 function extractAgentResponse(data) {
   if (data.messages && data.messages.length > 0) {
-    return data.messages
+    const messageText = data.messages
       .filter(m => m.type === "Inform" || m.type === "Text" || m.message)
       .map(m => m.message || m.text || "")
       .filter(Boolean)
       .join("<br><br>") || "I'm here to help! Could you rephrase your question?";
+    
+    // Check if message contains case data
+    const caseData = detectCaseData(messageText);
+    if (caseData) {
+      return { type: 'cases', cases: caseData.cases, additionalText: caseData.additionalText };
+    }
+    
+    // Check if message contains slot data
+    const slotData = detectSlotData(messageText);
+    if (slotData) {
+      return { type: 'slots', slots: slotData.slots, additionalText: slotData.additionalText };
+    }
+    
+    return messageText;
   }
   if (data.message) return data.message;
   if (data.text) return data.text;
@@ -386,14 +457,279 @@ function extractAgentResponse(data) {
   return "I received your message but couldn't extract a response. Please try again.";
 }
 
+// ── Detect Case Data in Response ──────────────────
+function detectCaseData(text) {
+  try {
+    // Clean up the text and normalize newlines
+    const cleanText = text.replace(/\\n/g, '\n').replace(/\\\"/g, '"');
+    
+    // Look for JSON array or object patterns in the text
+    const jsonMatch = cleanText.match(/\[\s*\{[\s\S]*?\}\s*\]|\{[\s\S]*?"Case Number"[\s\S]*?\}/);
+    if (!jsonMatch) return null;
+    
+    const jsonStr = jsonMatch[0];
+    const parsed = JSON.parse(jsonStr);
+    
+    // Check if it's a case or array of cases
+    const cases = Array.isArray(parsed) ? parsed : [parsed];
+    
+    // Validate it contains case data
+    if (cases.length > 0 && cases[0]["Case Number"]) {
+      // Extract any text after the JSON
+      const jsonEndIndex = cleanText.indexOf(jsonStr) + jsonStr.length;
+      const additionalText = cleanText.substring(jsonEndIndex).trim();
+      
+      return {
+        cases,
+        additionalText: additionalText || null
+      };
+    }
+  } catch (e) {
+    // Not valid JSON or not case data
+    console.log('Case detection failed:', e.message);
+  }
+  return null;
+}
+
+// ── Detect Slot Data in Response ──────────────────
+function detectSlotData(text) {
+  try {
+    // Clean up the text and normalize
+    const cleanText = text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+    
+    // Method 1: Try JSON object with "slots" field
+    const jsonMatch = cleanText.match(/\{[^}]*"slots"\s*:\s*"[^"]+"[^}]*\}/);
+    if (jsonMatch) {
+      const jsonStr = jsonMatch[0];
+      const parsed = JSON.parse(jsonStr);
+      
+      // Check if it has slots field
+      if (parsed.slots) {
+        // Split the slots string by comma
+        const slotsArray = parsed.slots.split(',').map(s => s.trim()).filter(Boolean);
+        
+        // Extract any text before the JSON
+        const jsonStartIndex = cleanText.indexOf(jsonStr);
+        const additionalText = cleanText.substring(0, jsonStartIndex).trim();
+        
+        return {
+          slots: slotsArray,
+          additionalText: additionalText || null
+        };
+      }
+    }
+    
+    // Method 2: Look for text-based pattern "available time slots are:"
+    const slotPattern = /available time slots are:/i;
+    if (slotPattern.test(cleanText)) {
+      const match = cleanText.match(slotPattern);
+      const matchIndex = cleanText.indexOf(match[0]);
+      
+      // Extract text before the slots phrase
+      const beforeText = cleanText.substring(0, matchIndex + match[0].length).trim();
+      
+      // Extract text after the slots phrase
+      const afterMatch = cleanText.substring(matchIndex + match[0].length);
+      
+      // Find all time slot patterns (e.g., "8:00AM–10:00AM" or "12:00PM–2:00PM")
+      const timeSlotRegex = /\d{1,2}:\d{2}\s*[AP]M\s*[–-]\s*\d{1,2}:\d{2}\s*[AP]M/g;
+      const slotsArray = afterMatch.match(timeSlotRegex);
+      
+      if (slotsArray && slotsArray.length > 0) {
+        // Find where the last slot ends
+        const lastSlot = slotsArray[slotsArray.length - 1];
+        const lastSlotIndex = afterMatch.lastIndexOf(lastSlot) + lastSlot.length;
+        const remainingText = afterMatch.substring(lastSlotIndex).trim();
+        
+        // Combine before and after text
+        const additionalText = (beforeText + (remainingText ? '\n\n' + remainingText : '')).trim();
+        
+        return {
+          slots: slotsArray.map(s => s.trim()),
+          additionalText: additionalText || null
+        };
+      }
+    }
+  } catch (e) {
+    // Not valid JSON or not slot data
+    console.log('Slot detection failed:', e.message);
+  }
+  return null;
+}
+
+// ── Render Case Cards ─────────────────────────────
+let currentCases = []; // Store cases globally for modal access
+
+function renderCaseCards(cases) {
+  currentCases = cases; // Store for later access
+  
+  const casesHtml = cases.map((caseData, index) => `
+    <div class="case-card" onclick="handleCaseAction(${index}, 'view')">
+      <div class="case-card-content">
+        <div class="case-number">
+          <i class="fa-solid fa-ticket"></i>
+          <strong>${caseData["Case Number"]}</strong>
+        </div>
+        <h4 class="case-subject">${caseData.CaseSubject || 'No Subject'}</h4>
+      </div>
+      <div class="case-card-arrow">
+        <i class="fa-solid fa-chevron-right"></i>
+      </div>
+    </div>
+  `).join('');
+  
+  return `
+    <div class="cases-container">
+      <div class="cases-header">
+        <i class="fa-solid fa-folder-open"></i>
+        <span>Your Cases (${cases.length})</span>
+      </div>
+      ${casesHtml}
+    </div>
+  `;
+}
+
+// ── Render Slot Cards ─────────────────────────────
+function renderSlotCards(slots) {
+  const slotsHtml = slots.map((slot, index) => {
+    const timeIcon = slot.includes('AM') || slot.includes('PM') ? 'fa-clock' : 'fa-calendar';
+    return `
+      <button class="slot-card" onclick="handleSlotSelection('${slot}')">
+        <div class="slot-icon">
+          <i class="fa-solid ${timeIcon}"></i>
+        </div>
+        <div class="slot-time">${slot}</div>
+        <div class="slot-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </button>
+    `;
+  }).join('');
+  
+  return `
+    <div class="slots-container">
+      <div class="slots-header">
+        <i class="fa-solid fa-truck-fast"></i>
+        <span>Select Delivery Time</span>
+      </div>
+      ${slotsHtml}
+    </div>
+  `;
+}
+
+// ── Handle Slot Selection ─────────────────────────
+function handleSlotSelection(slot) {
+  // Send the selected slot as a user message
+  ecomproInput.value = `I choose ${slot}`;
+  ecomproForm.dispatchEvent(new Event('submit'));
+}
+
+// ── Handle Case Actions ───────────────────────────
+function handleCaseAction(caseIndex, action) {
+  const caseData = currentCases[caseIndex];
+  if (!caseData) return;
+  
+  if (action === 'view') {
+    showCaseModal(caseData);
+  } else if (action === 'comment') {
+    sendUserMessage(`I want to add a comment to case ${caseData["Case Number"]}`);
+  }
+}
+
+// ── Case Modal Management ──────────────────────────
+function showCaseModal(caseData) {
+  const modal = document.getElementById('caseModal');
+  const overlay = document.getElementById('caseModalOverlay');
+  const modalBody = document.getElementById('caseModalBody');
+  
+  const statusColors = {
+    'New': '#00cec9',
+    'In Progress': '#fdcb6e',
+    'Escalated': '#e17055',
+    'Closed': '#00b894',
+    'Pending': '#74b9ff'
+  };
+  
+  modalBody.innerHTML = `
+    <div class="case-detail-item">
+      <label><i class="fa-solid fa-hashtag"></i> Case Number</label>
+      <div class="case-detail-value">${caseData["Case Number"]}</div>
+    </div>
+    <div class="case-detail-item">
+      <label><i class="fa-solid fa-info-circle"></i> Status</label>
+      <div class="case-detail-value">
+        <span class="case-status-badge" style="background-color: ${statusColors[caseData.CaseStatus] || '#6c5ce7'}">
+          ${caseData.CaseStatus}
+        </span>
+      </div>
+    </div>
+    <div class="case-detail-item">
+      <label><i class="fa-solid fa-heading"></i> Subject</label>
+      <div class="case-detail-value">${caseData.CaseSubject || 'No Subject'}</div>
+    </div>
+    <div class="case-detail-item">
+      <label><i class="fa-solid fa-align-left"></i> Description</label>
+      <div class="case-detail-value case-description-text">${caseData.CaseDescription || 'No description available.'}</div>
+    </div>
+    <div class="case-modal-actions">
+      <button class="btn btn-primary" onclick="closeCaseModal(); sendUserMessage('I want to add a comment to case ${caseData["Case Number"]}')">
+        <i class="fa-solid fa-comment"></i> Add Comment
+      </button>
+      <button class="btn btn-outline" onclick="closeCaseModal()">
+        Close
+      </button>
+    </div>
+  `;
+  
+  modal.classList.add('open');
+  overlay.classList.add('open');
+}
+
+function closeCaseModal() {
+  const modal = document.getElementById('caseModal');
+  const overlay = document.getElementById('caseModalOverlay');
+  modal.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+// Close modal when clicking overlay
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('caseModalOverlay');
+  const closeBtn = document.getElementById('caseModalClose');
+  
+  if (overlay) {
+    overlay.addEventListener('click', closeCaseModal);
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeCaseModal);
+  }
+});
+
+// Make functions available globally for inline onclick handlers
+window.handleCaseAction = handleCaseAction;
+window.closeCaseModal = closeCaseModal;
+
 // ── UI Helpers ────────────────────────────────────
-function appendMessage(role, text) {
+function appendMessage(role, content) {
   const div = document.createElement("div");
   div.className = `ecompro-msg ${role}`;
   const icon = role === "bot"
     ? `<div class="ecompro-msg-avatar"><i class="fa-solid fa-robot"></i></div>`
     : `<div class="ecompro-msg-avatar"><i class="fa-solid fa-user"></i></div>`;
-  div.innerHTML = `${icon}<div class="ecompro-msg-bubble">${text}</div>`;
+  
+  // Handle special content types
+  let messageContent;
+  if (typeof content === 'object' && content.type === 'cases') {
+    const casesHtml = renderCaseCards(content.cases);
+    messageContent = casesHtml + (content.additionalText ? `<p style="margin-top: 16px;">${content.additionalText}</p>` : '');
+  } else if (typeof content === 'object' && content.type === 'slots') {
+    const slotsHtml = renderSlotCards(content.slots);
+    messageContent = (content.additionalText ? `<p style="margin-bottom: 12px;">${content.additionalText}</p>` : '') + slotsHtml;
+  } else {
+    messageContent = content;
+  }
+  
+  div.innerHTML = `${icon}<div class="ecompro-msg-bubble">${messageContent}</div>`;
   ecomproMsgs.appendChild(div);
   ecomproMsgs.scrollTop = ecomproMsgs.scrollHeight;
 }
@@ -420,16 +756,14 @@ function updateConnectionUI(status, text) {
   connectionStatus.innerHTML = `<span class="status-dot ${status}"></span> ${text}`;
 }
 
-function updateModeNote(connected) {
-  if (connected) {
-    ecomproModeNote.innerHTML = `✅ Powered by <strong>Salesforce Agentforce</strong>`;
-    ecomproModeNote.classList.add("connected");
-  } else {
-    ecomproModeNote.innerHTML = `⚡ Using local AI — <a href="#" id="openSettingsLink">connect Agentforce</a> for full power`;
-    ecomproModeNote.classList.remove("connected");
-    const link = document.getElementById("openSettingsLink");
-    if (link) link.addEventListener("click", (e) => { e.preventDefault(); ecomproSettings.classList.add("open"); });
-  }
+function updateHeaderStatus(status, text) {
+  const statusMap = {
+    'connecting': '⏳ ',
+    'online': '🟢 ',
+    'offline': '🔴 '
+  };
+  const icon = statusMap[status] || '';
+  ecomproHeaderStatus.textContent = `${icon}${text}`;
 }
 
 
