@@ -1332,6 +1332,100 @@ button { cursor: pointer; border: none; font-family: inherit; }
 }
 
 /* ===========================
+   ORDER CARDS
+   =========================== */
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.orders-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-light);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dark-4);
+  margin-bottom: 4px;
+}
+
+.order-card {
+  background: var(--dark-2);
+  border: 1px solid var(--dark-4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.order-card:hover {
+  border-color: var(--primary);
+  background: var(--dark-3);
+  transform: translateX(4px);
+}
+
+.order-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.order-id i {
+  color: var(--primary-light);
+  font-size: 0.9rem;
+}
+
+.order-item {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.order-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.order-card-arrow {
+  color: var(--gray);
+  font-size: 0.9rem;
+  transition: var(--transition);
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.order-card:hover .order-card-arrow {
+  color: var(--primary-light);
+  transform: translateX(4px);
+}
+
+/* ===========================
    SCROLLBAR
    =========================== */
 ::-webkit-scrollbar { width: 6px; }

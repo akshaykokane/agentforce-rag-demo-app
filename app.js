@@ -435,12 +435,18 @@ function extractAgentResponse(data) {
     const caseData = detectCaseData(messageText);
     if (caseData) {
       return { type: 'cases', cases: caseData.cases, additionalText: caseData.additionalText };
-    }
+    } 
     
     // Check if message contains slot data
     const slotData = detectSlotData(messageText);
     if (slotData) {
       return { type: 'slots', slots: slotData.slots, additionalText: slotData.additionalText };
+    }
+    
+    // Check if message contains order data
+    const orderData = detectOrderData(messageText);
+    if (orderData) {
+      return { type: 'orders', orders: orderData.orders, additionalText: orderData.additionalText };
     }
     
     return messageText;
@@ -463,26 +469,60 @@ function detectCaseData(text) {
     // Clean up the text and normalize newlines
     const cleanText = text.replace(/\\n/g, '\n').replace(/\\\"/g, '"');
     
-    // Look for JSON array or object patterns in the text
+    // Method 1: Try JSON array or object patterns
     const jsonMatch = cleanText.match(/\[\s*\{[\s\S]*?\}\s*\]|\{[\s\S]*?"Case Number"[\s\S]*?\}/);
-    if (!jsonMatch) return null;
-    
-    const jsonStr = jsonMatch[0];
-    const parsed = JSON.parse(jsonStr);
-    
-    // Check if it's a case or array of cases
-    const cases = Array.isArray(parsed) ? parsed : [parsed];
-    
-    // Validate it contains case data
-    if (cases.length > 0 && cases[0]["Case Number"]) {
-      // Extract any text after the JSON
-      const jsonEndIndex = cleanText.indexOf(jsonStr) + jsonStr.length;
-      const additionalText = cleanText.substring(jsonEndIndex).trim();
+    if (jsonMatch) {
+      const jsonStr = jsonMatch[0];
+      const parsed = JSON.parse(jsonStr);
       
-      return {
-        cases,
-        additionalText: additionalText || null
-      };
+      // Check if it's a case or array of cases
+      const cases = Array.isArray(parsed) ? parsed : [parsed];
+      
+      // Validate it contains case data
+      if (cases.length > 0 && cases[0]["Case Number"]) {
+        // Extract any text after the JSON
+        const jsonEndIndex = cleanText.indexOf(jsonStr) + jsonStr.length;
+        const additionalText = cleanText.substring(jsonEndIndex).trim();
+        
+        return {
+          cases,
+          additionalText: additionalText || null
+        };
+      }
+    }
+    
+    // Method 2: Look for text-based case format with "Case Subject:"
+    if (/Subject:/i.test(cleanText)) {
+      const subjectMatch = cleanText.match(/Case Subject:\s*(.+?)(?=Case Description:|$)/is);
+      const descriptionMatch = cleanText.match(/Case Description:\s*(.+?)(?=Please|$)/is);
+      
+      if (subjectMatch) {
+        const caseSubject = subjectMatch[1].trim();
+        const caseDescription = descriptionMatch ? descriptionMatch[1].trim() : '';
+        
+        // Extract text before "Case Subject:" and after the case details
+        const subjectIndex = cleanText.search(/Case Subject:/i);
+        const beforeText = cleanText.substring(0, subjectIndex).trim();
+        
+        // Find where case details end (at "Please" or similar confirmation text)
+        const afterMatch = cleanText.match(/Please\s+confirm.+$/is);
+        const afterText = afterMatch ? afterMatch[0].trim() : '';
+        
+        const additionalText = (beforeText + (afterText ? '\n\n' + afterText : '')).trim();
+        
+        // Create a case object in the expected format
+        const caseObj = {
+          "Case Number": "Pending",
+          "CaseSubject": caseSubject,
+          "CaseDescription": caseDescription,
+          "CaseStatus": "Draft"
+        };
+        
+        return {
+          cases: [caseObj],
+          additionalText: additionalText || null
+        };
+      }
     }
   } catch (e) {
     // Not valid JSON or not case data
@@ -518,31 +558,21 @@ function detectSlotData(text) {
         };
       }
     }
-    
-    // Method 2: Look for text-based pattern "available time slots are:"
-    const slotPattern = /available time slots are:/i;
-    if (slotPattern.test(cleanText)) {
-      const match = cleanText.match(slotPattern);
-      const matchIndex = cleanText.indexOf(match[0]);
-      
-      // Extract text before the slots phrase
-      const beforeText = cleanText.substring(0, matchIndex + match[0].length).trim();
-      
-      // Extract text after the slots phrase
-      const afterMatch = cleanText.substring(matchIndex + match[0].length);
-      
+    console.log(cleanText);
+    // Method 2: Look for text containing "slot" and time patterns
+    if (/slot/i.test(cleanText)) {
       // Find all time slot patterns (e.g., "8:00AM–10:00AM" or "12:00PM–2:00PM")
       const timeSlotRegex = /\d{1,2}:\d{2}\s*[AP]M\s*[–-]\s*\d{1,2}:\d{2}\s*[AP]M/g;
-      const slotsArray = afterMatch.match(timeSlotRegex);
+      const slotsArray = cleanText.match(timeSlotRegex);
       
       if (slotsArray && slotsArray.length > 0) {
-        // Find where the last slot ends
-        const lastSlot = slotsArray[slotsArray.length - 1];
-        const lastSlotIndex = afterMatch.lastIndexOf(lastSlot) + lastSlot.length;
-        const remainingText = afterMatch.substring(lastSlotIndex).trim();
-        
-        // Combine before and after text
-        const additionalText = (beforeText + (remainingText ? '\n\n' + remainingText : '')).trim();
+        // Remove all time slots from the text to get the additional message
+        let additionalText = cleanText;
+        slotsArray.forEach(slot => {
+          additionalText = additionalText.replace(slot, '');
+        });
+        // Clean up extra whitespace
+        additionalText = additionalText.replace(/\s+/g, ' ').trim();
         
         return {
           slots: slotsArray.map(s => s.trim()),
@@ -557,8 +587,46 @@ function detectSlotData(text) {
   return null;
 }
 
+// ── Detect Order Data in Response ─────────────────
+function detectOrderData(text) {
+  try {
+    // Clean up the text and normalize
+    const cleanText = text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+    
+    // Look for JSON array with order objects - more flexible pattern
+    const jsonMatch = cleanText.match(/\[\s*\{[\s\S]*?orderId[\s\S]*?\}\s*\]/i);
+    if (!jsonMatch) return null;
+    
+    const jsonStr = jsonMatch[0];
+    const parsed = JSON.parse(jsonStr);
+    
+    // Check if it's an array of orders
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].orderId) {
+      // Extract any text before the JSON
+      const jsonStartIndex = cleanText.indexOf(jsonStr);
+      const beforeText = cleanText.substring(0, jsonStartIndex).trim();
+      
+      // Extract any text after the JSON
+      const jsonEndIndex = jsonStartIndex + jsonStr.length;
+      const afterText = cleanText.substring(jsonEndIndex).trim();
+      
+      const additionalText = (beforeText + (afterText ? '\n\n' + afterText : '')).trim();
+      
+      return {
+        orders: parsed,
+        additionalText: additionalText || null
+      };
+    }
+  } catch (e) {
+    // Not valid JSON or not order data
+    console.log('Order detection failed:', e.message);
+  }
+  return null;
+}
+
 // ── Render Case Cards ─────────────────────────────
 let currentCases = []; // Store cases globally for modal access
+let currentOrders = []; // Store orders globally for selection
 
 function renderCaseCards(cases) {
   currentCases = cases; // Store for later access
@@ -617,6 +685,61 @@ function renderSlotCards(slots) {
   `;
 }
 
+// ── Render Order Cards ────────────────────────────
+function renderOrderCards(orders) {
+  currentOrders = orders; // Store for later access
+  
+  const ordersHtml = orders.map((order, index) => {
+    const statusColors = {
+      'Shipped': '#00b894',
+      'Not shipped': '#fdcb6e',
+      'Delivered': '#00cec9',
+      'Cancelled': '#e17055',
+      'Processing': '#74b9ff'
+    };
+    
+    const statusColor = statusColors[order.status] || '#dfe6e9';
+    
+    return `
+      <button class="order-card" onclick="handleOrderSelection(${index})">
+        <div class="order-card-content">
+          <div class="order-id">
+            <i class="fa-solid fa-box"></i>
+            <strong>#${order.orderId}</strong>
+          </div>
+          <div class="order-item">${order.item || 'Unknown Item'}</div>
+          <div class="order-status" style="background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40;">
+            ${order.status || 'Unknown'}
+          </div>
+        </div>
+        <div class="order-card-arrow">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </button>
+    `;
+  }).join('');
+  
+  return `
+    <div class="orders-container">
+      <div class="orders-header">
+        <i class="fa-solid fa-shopping-cart"></i>
+        <span>Select an Order (${orders.length})</span>
+      </div>
+      ${ordersHtml}
+    </div>
+  `;
+}
+
+// ── Handle Order Selection ────────────────────────
+function handleOrderSelection(orderIndex) {
+  const order = currentOrders[orderIndex];
+  if (!order) return;
+  
+  // Send the selected order as a user message
+  ecomproInput.value = `I want to update order #${order.orderId}`;
+  ecomproForm.dispatchEvent(new Event('submit'));
+}
+
 // ── Handle Slot Selection ─────────────────────────
 function handleSlotSelection(slot) {
   // Send the selected slot as a user message
@@ -647,7 +770,8 @@ function showCaseModal(caseData) {
     'In Progress': '#fdcb6e',
     'Escalated': '#e17055',
     'Closed': '#00b894',
-    'Pending': '#74b9ff'
+    'Pending': '#74b9ff',
+    'Draft': '#a29bfe'
   };
   
   modalBody.innerHTML = `
@@ -672,12 +796,20 @@ function showCaseModal(caseData) {
       <div class="case-detail-value case-description-text">${caseData.CaseDescription || 'No description available.'}</div>
     </div>
     <div class="case-modal-actions">
-      <button class="btn btn-primary" onclick="closeCaseModal(); sendUserMessage('I want to add a comment to case ${caseData["Case Number"]}')">
-        <i class="fa-solid fa-comment"></i> Add Comment
-      </button>
-      <button class="btn btn-outline" onclick="closeCaseModal()">
-        Close
-      </button>
+      ${caseData.CaseStatus === 'Draft' || caseData["Case Number"] === 'Pending' 
+        ? `<button class="btn btn-primary" onclick="closeCaseModal(); sendUserMessage('Yes, please create this case')">
+             <i class="fa-solid fa-check"></i> Confirm & Create Case
+           </button>
+           <button class="btn btn-outline" onclick="closeCaseModal(); sendUserMessage('No, cancel the case creation')">
+             Cancel
+           </button>`
+        : `<button class="btn btn-primary" onclick="closeCaseModal(); sendUserMessage('I want to add a comment to case ${caseData["Case Number"]}')">
+             <i class="fa-solid fa-comment"></i> Add Comment
+           </button>
+           <button class="btn btn-outline" onclick="closeCaseModal()">
+             Close
+           </button>`
+      }
     </div>
   `;
   
@@ -708,6 +840,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Make functions available globally for inline onclick handlers
 window.handleCaseAction = handleCaseAction;
 window.closeCaseModal = closeCaseModal;
+window.handleSlotSelection = handleSlotSelection;
+window.handleOrderSelection = handleOrderSelection;
 
 // ── UI Helpers ────────────────────────────────────
 function appendMessage(role, content) {
@@ -725,6 +859,9 @@ function appendMessage(role, content) {
   } else if (typeof content === 'object' && content.type === 'slots') {
     const slotsHtml = renderSlotCards(content.slots);
     messageContent = (content.additionalText ? `<p style="margin-bottom: 12px;">${content.additionalText}</p>` : '') + slotsHtml;
+  } else if (typeof content === 'object' && content.type === 'orders') {
+    const ordersHtml = renderOrderCards(content.orders);
+    messageContent = (content.additionalText ? `<p style="margin-bottom: 12px;">${content.additionalText}</p>` : '') + ordersHtml;
   } else {
     messageContent = content;
   }
